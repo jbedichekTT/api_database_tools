@@ -1,0 +1,3 @@
+tree-sitter>=0.20.4
+tree-sitter-cpp>=0.20.0
+mcp

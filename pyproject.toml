@@ -1,0 +1,17 @@
+[project]
+name = "tt-metal-mcp-tools"
+version = "1.0.0"
+description = "MCP tools for TT-Metal API analysis"
+requires-python = ">=3.8"
+dependencies = [
+    "mcp>=0.1.0",
+    "tree-sitter>=0.20.0",
+    "tree-sitter-cpp>=0.20.0"  # if available as a package
+]
+
+[project.scripts]
+tt-metal-mcp = "mcp_tt_metal_tools.server:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
