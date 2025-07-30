@@ -1,6 +1,6 @@
 # TT-Metal API Analysis Tools
 
-A comprehensive toolkit for analyzing and querying the TT-Metal API codebase using tree-sitter for general code parsing and analysis. This project provides both database generation tools and query interfaces exposed through an MCP (Model Context Protocol) server.
+This repo contains tools for analyzing and querying the TT-Metal API codebase using tree-sitter for general code parsing and analysis. This project provides both database generation tools and query interfaces exposed through an MCP (Model Context Protocol) server.
 
 ## Overview
 
@@ -206,13 +206,13 @@ Available tools:
 
 ## Usage
 
-### Building the Databases (Optional, comes with the repo, 5-10 min)
+### Building the Databases (Optional)
 
 The tools are configured to look for the databases in their same root folder (i.e api_database_tools/tools), so make sure the output 
 is configured to point there when rebuilding the database. Depending on the scope of the database, meaning which folders in metal it is parsing,
 it may take anywhere from a a few minutes for something localized, like LLK, or up to 10 minutes for all of the functional code in the tt_metal and ttnn folders. 
 
-## Configuring the database scope
+#### Configuring the database scope
 
 Modify the search directories (recursive) [here](https://github.com/jbedichekTT/api_database_tools/blob/2d9d7ca46c8313e871d7409ca1723997ce71a025/db_generation/build_api_impl_db.py#L48) and [here](https://github.com/jbedichekTT/api_database_tools/blob/2d9d7ca46c8313e871d7409ca1723997ce71a025/db_generation/build_api_signature_db.py#L44) or by passing them as command line args with `--scan-dirs`
 
