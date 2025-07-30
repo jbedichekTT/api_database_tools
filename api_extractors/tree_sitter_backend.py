@@ -1,13 +1,3 @@
-"""
-Tree-sitter utility wrapper for C++ - Correct Implementation
-===========================================================
-
-Based on the actual py-tree-sitter API where:
-- parser.language = LANGUAGE (not set_language)
-- query.captures() returns a dict of {capture_name: [nodes]}
-- query.matches() returns [(pattern_index, {capture_name: [nodes]})]
-"""
-
 import os
 import subprocess
 import threading

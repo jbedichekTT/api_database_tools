@@ -12,7 +12,7 @@ from collections import defaultdict, OrderedDict
 from dataclasses import dataclass, field
 import tempfile
 
-from api_tools.api_extractors.tree_sitter_backend import parse_file, query
+from api_database_tools.api_extractors.tree_sitter_backend import parse_file, query
 
 @dataclass
 class FunctionCall:

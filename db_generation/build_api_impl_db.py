@@ -12,12 +12,12 @@ from typing import Dict, List, Set, Optional, Tuple, Any
 from collections import defaultdict
 import hashlib
 import re
-from api_tools.api_extractors.definition_extractor_impl import (
+from api_database_tools.api_extractors.definition_extractor_impl import (
     extract_apis_from_header,
     extract_member_functions
 )
 
-from api_tools.api_extractors.tree_sitter_backend import parse_file, query
+from api_database_tools.api_extractors.tree_sitter_backend import parse_file, query
 
 class APISignatureDatabase:
     """Database containing full API signatures and implementations."""

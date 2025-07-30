@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-MCP Server for TT-Metal API Tools
-"""
-
 import asyncio
 import json
 from typing import Any, Dict, List
@@ -13,10 +8,9 @@ from mcp.shared.exceptions import McpError
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
-# Import your tools
-from api_tools.tools.get_decomposed_function import decompose_function
-from api_tools.tools.get_llk_functions import query_llk_functions  
-from api_tools.tools.get_similar_symbols import find_similar_symbols
+from api_database_tools.tools.get_decomposed_function import decompose_function
+from api_database_tools.tools.get_llk_functions import query_llk_functions  
+from api_database_tools.tools.get_similar_symbols import find_similar_symbols
 
 # Create server instance
 app = Server("tt-metal-tools")
