@@ -1,6 +1,7 @@
 import asyncio
 import json
 from typing import Any, Dict, List
+import logging 
 
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
@@ -70,6 +71,12 @@ TOOLS = [
     )
 ]
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 @app.list_tools()
 async def list_tools() -> List[Tool]:
     """List available tools."""
@@ -78,6 +85,10 @@ async def list_tools() -> List[Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: Any) -> List[TextContent]:
     """Execute a tool and return results."""
+    # Log tool invocation
+    logger.info(f"🛠️  MCP Tool Called: {name}")
+    logger.info(f"🛠️  Arguments: {json.dumps(arguments, indent=2)}")
+    
     try:
         if name == "decompose_function":
             result = await decompose_function(
@@ -89,18 +100,26 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
         elif name == "query_llk_functions":
             result = await query_llk_functions(
                 keyword=arguments["keyword"],
-                #database_path=arguments.get("database_path", "./api_database.json")
+                #database_path=arguments.get("database_path", "./api_signatures_db.json")
             )
         
         elif name == "find_similar_symbols":
             result = await find_similar_symbols(
-                symbol=arguments["symbol"],
+                incorrect_symbol=arguments["incorrect_symbol"],
                 max_results=arguments.get("max_results", 10),
                 #database_path=arguments.get("database_path", "./api_signatures_db.json")
             )
         
         else:
             raise McpError(f"Unknown tool: {name}")
+        
+        # Log result summary
+        logger.info(f"✅ Tool {name} completed successfully")
+        if isinstance(result, dict):
+            if "error" in result:
+                logger.error(f"❌ Tool error: {result['error']}")
+            elif "results" in result:
+                logger.info(f"✅ Found {len(result.get('results', []))} results")
         
         # Format result as JSON string
         if isinstance(result, dict):
@@ -111,6 +130,7 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
         return [TextContent(type="text", text=content)]
         
     except Exception as e:
+        logger.error(f"❌ Tool execution failed: {str(e)}")
         raise McpError(f"Tool execution failed: {str(e)}")
 
 async def main():
