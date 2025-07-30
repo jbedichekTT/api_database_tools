@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Build a comprehensive database of API signatures for validation purposes.
-Uses enhanced extraction to capture ALL APIs.
-"""
-
 import os
 import json
 import time
@@ -28,14 +22,12 @@ class APISignatureDatabase:
             "metadata": {
                 "created": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "tt_metal_path": str(self.tt_metal_path),
-                "version": "2.0",  # Enhanced version
                 "description": "Comprehensive API signatures database"
             },
             "apis": {},
             "headers": {},
             "namespaces": defaultdict(list),
         }
-        # Track what we've seen to avoid duplicates
         self.seen_apis = set()
         
     def build_database(self, scan_dirs: List[str] = None):
@@ -44,7 +36,6 @@ class APISignatureDatabase:
             scan_dirs = [
                 "ttnn",
                 "tt_metal"
-                #"tt_metal/api/"
             ]
         
         print(f"Building Enhanced API Signatures Database")
@@ -162,9 +153,7 @@ class APISignatureDatabase:
                                 header_apis.append(api_entry["key"])
                 except Exception as e:
                     print(f"  Tree-sitter extraction failed: {e}")
-
-                # Also use the original regex-based extraction as fallback
-                # This ensures we don't miss functions that tree-sitter couldn't parse
+                # Process function signatures from the main API extraction
                 for func_sig in apis.get("functions", []):
                     # Check if we already have this function
                     func_name = self._extract_function_name(func_sig)
@@ -924,7 +913,7 @@ def extract_parameter_types_from_list(tree_id: str, param_text: str, parent_rang
     return param_types
 
 def extract_parameter_types_from_text(param_text: str) -> List[str]:
-    """Extract parameter types from parameter list text - FIXED VERSION."""
+    """Extract parameter types from parameter list text"""
     if not param_text or param_text == '()':
         return []
     

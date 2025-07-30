@@ -188,9 +188,7 @@ Similarity algorithm:
 - Character overlap: score based on matching characters
 
 Useful for:
-- Finding the correct function name when you have a typo
-- Discovering related functions
-- Exploring available APIs
+- Finding the correct function name when there's an API misusage
 
 ### MCP Server
 
@@ -208,33 +206,51 @@ Available tools:
 
 ## Usage
 
-### Building the Databases
+### Building the Databases (Optional, comes with the repo, 5-10 min)
+
+The tools are configured to look for the databases in their same root folder (i.e api_database_tools/tools), so make sure the output 
+is configured to point there when rebuilding the database. Depending on the scope of the database, meaning which folders in metal it is parsing,
+it may take anywhere from a a few minutes for something localized, like LLK, or up to 10 minutes for all of the functional code in the tt_metal and ttnn folders. 
+
+## Configuring the database scope
+
+Modify the search directories (recursive) [here](https://github.com/jbedichekTT/api_database_tools/blob/2d9d7ca46c8313e871d7409ca1723997ce71a025/db_generation/build_api_impl_db.py#L48) and [here](https://github.com/jbedichekTT/api_database_tools/blob/2d9d7ca46c8313e871d7409ca1723997ce71a025/db_generation/build_api_signature_db.py#L44) or by passing them as command line args with `--scan-dirs`
+
+
 
 1. Generate the signatures database:
 ```bash
-python db_generation/build_api_signature_db.py --tt-metal-path /path/to/tt-metal --output api_signatures_db.json
+python db_generation/build_api_signature_db.py --tt-metal-path /path/to/tt-metal --output path/to/tools/api_signatures_db.json
 ```
 
 2. Generate the implementations database:
 ```bash
-python db_generation/build_api_impl_db.py --tt-metal-path /path/to/tt-metal --output api_impl_db.json
+python db_generation/build_api_impl_db.py --tt-metal-path /path/to/tt-metal --output path/to/tools/api_impl_db.json
 ```
+
+
+
 
 ### Using the Tools
 
+To test each tool in isolation, use these commands:
+
 1. Query LLK functions:
+*Warning* This tool is very sensitive to exact similarity of name.
 ```bash
 python tools/get_llk_functions.py exp
 ```
 
 2. Find similar symbols:
+The max argument is the maximum number of similar symbols to return.
 ```bash
 python tools/get_similar_symbols.py DataMovmentKernel --max 5
 ```
 
 3. Decompose a function:
+The function argument corresponds to the name of the function to decompose in the file. 
 ```bash
-python tools/get_decomposed_function.py --file kernel.cpp --function my_kernel --comments
+python tools/get_decomposed_function.py --file test.cpp --function my_kernel
 ```
 
 ### Running the MCP Server
@@ -243,7 +259,7 @@ python tools/get_decomposed_function.py --file kernel.cpp --function my_kernel -
 python server.py
 ```
 
-The server will expose all tools through the MCP protocol for integration with AI assistants.
+The server exposes all tools through the MCP protocol for integration with LLMs.
 
 ## Requirements
 
@@ -257,27 +273,5 @@ Install with:
 pip install -r requirements.txt
 ```
 
-## How Tree-sitter Queries Work
-
-Tree-sitter uses a Lisp-like query language. For example:
-
-```lisp
-(function_definition
-  type: (_) @return_type
-  declarator: (function_declarator
-    declarator: (identifier) @function_name
-    parameters: (parameter_list) @params
-  )
-) @function
-```
-
-This query:
-1. Matches `function_definition` nodes
-2. Captures the return type as `@return_type`
-3. Captures the function name as `@function_name`
-4. Captures the parameter list as `@params`
-5. Captures the entire function as `@function`
-
-The results include the matched text and byte ranges, allowing precise code extraction.
 
 
