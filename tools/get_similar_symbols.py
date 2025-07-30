@@ -8,7 +8,8 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
-
+import sys
+import asyncio
 
 class SymbolFinder:
     """Find similar symbols in the TT-Metal API database."""
@@ -232,7 +233,7 @@ async def find_similar_symbols(
 # Command line interface
 def main():
     """Main function for command line usage."""
-    import sys
+    
     
     # Check arguments
     if len(sys.argv) < 2:
@@ -274,7 +275,7 @@ def main():
     if debug:
         print("Debug mode enabled\n")
     
-    result = find_similar_symbols(symbol, max_results, debug=debug)
+    result = asyncio.run(find_similar_symbols(symbol, max_results, debug=debug))
     
     # Print results
     print(json.dumps(result, indent=2))

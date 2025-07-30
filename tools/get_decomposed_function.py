@@ -118,7 +118,7 @@ class FunctionDecomposer:
     def _analyze_function_recursive(self,
                                   func_name: str,
                                   func_body: str,
-                                  result: Result,
+                                  result: AnalysisResult,
                                   visited: Set[str],
                                   depth: int):
         """Recursively analyze a function and its dependencies."""
@@ -311,7 +311,7 @@ class FunctionDecomposer:
         
         return None
     
-    def format_output(self, result: Result, include_comments: bool = False) -> str:
+    def format_output(self, result: AnalysisResult, include_comments: bool = False) -> str:
         """Format the analysis result as requested."""
         output = []
         
@@ -397,9 +397,8 @@ def main():
     parser.add_argument("--comments", help="Display comments explaining the dependency scope of the function", action="store_true")
     
     args = parser.parse_args()
-    
     # Create analyzer
-    analyzer = FunctionDecomposer(args.database, args.comments)
+    analyzer = FunctionDecomposer(args.database)
     
     # Perform analysis
     print(f"\nAnalyzing dependencies for '{args.function}' from {args.file}")

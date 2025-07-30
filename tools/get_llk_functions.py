@@ -8,7 +8,8 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 from collections import defaultdict
-
+import asyncio
+import sys
 
 class LLKFunctionQuery:
     """Query LLK functions from the TT-Metal API database using simple substring search."""
@@ -21,7 +22,18 @@ class LLKFunctionQuery:
     
     def __init__(self, database_path: Optional[str] = None):
         """Initialize with database path."""
-        self.database_path = Path(database_path or self.DATABASE_PATH)
+        if database_path is None:
+            # If no path provided, try to find the database
+            # First try current directory
+            self.database_path = Path(self.DATABASE_PATH)
+            
+            # If not found, try relative to script location
+            if not self.database_path.exists():
+                script_dir = Path(__file__).parent.parent  # Go up from tools/ to project root
+                self.database_path = script_dir / "api_signatures_db.json"
+        else:
+            self.database_path = Path(database_path)
+            
         self.database = None
         self._load_database()
     
@@ -186,12 +198,14 @@ async def query_llk_functions(keyword: str) -> Dict[str, List]:
 
 # Standalone testing
 if __name__ == "__main__":
-    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python get_llk_functions.py <keyword>")
+        sys.exit(1)
 
     keyword = sys.argv[1]
     
-    # Test the tool
-    result = query_sfpi_functions(keyword)
+    # Test the tool - properly handle async
+    result = asyncio.run(query_llk_functions(keyword))
     
     # Pretty print the result
     print(json.dumps(result, indent=2))
