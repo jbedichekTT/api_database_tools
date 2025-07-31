@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "MCP tools for TT-Metal API analysis"
 requires-python = ">=3.8"
 dependencies = [
-    "mcp>=0.1.0",
+    "fastmcp",
     "tree-sitter>=0.20.0",
     "tree-sitter-cpp>=0.20.0"
 ]
