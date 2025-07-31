@@ -6,12 +6,14 @@ from typing import Dict, List, Set, Optional
 from collections import defaultdict
 import hashlib
 
-from api_database_tools.api_extractors.definition_extractor import (
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from api_extractors.definition_extractor import (
     extract_apis_from_header,
     extract_member_functions
 )
-
-from api_database_tools.api_extractors.tree_sitter_backend import parse_file, query
+from api_extractors.tree_sitter_backend import parse_file, query
 
 class APISignatureDatabase:
     """Database containing full API signatures for validation."""

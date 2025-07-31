@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import List, Dict, Set, Optional, Any, Tuple
 from collections import defaultdict
-from api_database_tools.api_extractors.tree_sitter_backend import parse_file, query
+from .tree_sitter_backend import parse_file, query
 
 class ASTNodeAnalyzer:
     """Analyzes AST nodes to extract semantic information."""
