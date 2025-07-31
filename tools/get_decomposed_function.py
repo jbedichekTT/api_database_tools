@@ -11,8 +11,11 @@ from typing import Dict, List, Set, Optional, Tuple, Any
 from collections import defaultdict, OrderedDict
 from dataclasses import dataclass, field
 import tempfile
-
-from api_database_tools.api_extractors.tree_sitter_backend import parse_file, query
+import asyncio
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from api_extractors.tree_sitter_backend import parse_file, query
 
 @dataclass
 class FunctionCall:
@@ -362,8 +365,9 @@ class FunctionDecomposer:
         
         return '\n'.join(output)
 
-async def decompose_function(file_path: str, function_name: str, database_path: str) -> Dict[str, Any]:
+async def decompose_function(file_path: str, function_name: str) -> Dict[str, Any]:
     """Async wrapper for function decomposition."""
+    database_path = Path(__file__).parent / "api_impl_db.json"
     try:
         analyzer = FunctionDecomposer(database_path)
         result = analyzer.analyze_dependencies(file_path, function_name)
@@ -374,8 +378,6 @@ async def decompose_function(file_path: str, function_name: str, database_path: 
         return {
             "function": function_name,
             "file": file_path,
-            "total_functions": len(result.functions),
-            "missing_functions": list(result.missing_functions),
             "decomposed_code": output
         }
     except Exception as e:
@@ -390,34 +392,26 @@ def main():
         description="Analyze function dependencies and output in dependency order"
     )
     
-    parser.add_argument("--database", help="Path to the API database JSON file", default = './api_impl_db.json')
     parser.add_argument("--file", help="Source file containing the function")
     parser.add_argument("--function", help="Function name to analyze")
-    parser.add_argument("--output", help="Output file for dependency-ordered code")
-    parser.add_argument("--comments", help="Display comments explaining the dependency scope of the function", action="store_true")
     
     args = parser.parse_args()
+    output = asyncio.run(decompose_function(args.file, args.function))
+    print(output)
     # Create analyzer
-    analyzer = FunctionDecomposer(args.database)
+    #analyzer = FunctionDecomposer(args.database)
     
     # Perform analysis
-    print(f"\nAnalyzing dependencies for '{args.function}' from {args.file}")
+    #print(f"\nAnalyzing dependencies for '{args.function}' from {args.file}")
     
-    result = analyzer.analyze_dependencies(
-        args.file,
-        args.function
-    )
+    #result = analyzer.analyze_dependencies(
+    #    args.file,
+   #     args.function
+   #)
     
     # Format output
-    output = analyzer.format_output(result, args.comments)
+    #output = analyzer.format_output(result, args.comments)
     
-    # Output the result
-    if args.output:
-        with open(args.output, 'w') as f:
-            f.write(output)
-        print(f"\nOutput written to: {args.output}")
-    else:
-        print("\n" + output)
 
 
 if __name__ == "__main__":

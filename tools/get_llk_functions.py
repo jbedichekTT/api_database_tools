@@ -13,27 +13,13 @@ import sys
 
 class LLKFunctionQuery:
     """Query LLK functions from the TT-Metal API database using simple substring search."""
-    
-    # Hardcoded but easily configurable database path
-    DATABASE_PATH = "./api_signatures_db.json"
-    
+        
     # Target path for SFPI functions
     SFPI_BASE_PATH = "hw/ckernels/wormhole_b0/metal/llk_api"
     
     def __init__(self, database_path: Optional[str] = None):
         """Initialize with database path."""
-        if database_path is None:
-            # If no path provided, try to find the database
-            # First try current directory
-            self.database_path = Path(self.DATABASE_PATH)
-            
-            # If not found, try relative to script location
-            if not self.database_path.exists():
-                script_dir = Path(__file__).parent.parent  # Go up from tools/ to project root
-                self.database_path = script_dir / "api_signatures_db.json"
-        else:
-            self.database_path = Path(database_path)
-            
+        self.database_path = Path(__file__).parent / "api_signatures_db.json" # Hard coded to be in the same directory as this file
         self.database = None
         self._load_database()
     

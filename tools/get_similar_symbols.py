@@ -14,9 +14,9 @@ import asyncio
 class SymbolFinder:
     """Find similar symbols in the TT-Metal API database."""
     
-    def __init__(self, database_path: str = "./api_signatures_db.json", debug: bool = False):
+    def __init__(self, debug: bool = False):
         """Initialize the symbol finder."""
-        self.database_path = Path(database_path)
+        self.database_path = Path(__file__).parent / "api_signatures_db.json"
         self.debug = debug
         self.database = None
         
