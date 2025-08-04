@@ -12,6 +12,7 @@ import json
 import sys
 import os
 import asyncio
+import argparse
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
@@ -25,6 +26,24 @@ os.chdir(project_root)
 from tools.get_decomposed_function import decompose_function, FunctionDecomposer
 from tools.get_llk_functions import query_llk_functions, LLKFunctionQuery
 from tools.get_similar_symbols import find_similar_symbols, SymbolFinder
+
+
+
+
+def display_tool_output(tool_name: str, input_args: dict, output: dict, should_display: bool):
+    """Display tool output in a format that shows what the model would see."""
+    if not should_display:
+        return
+        
+    print(f"\n{'='*60}")
+    print(f"TOOL: {tool_name}")
+    print(f"{'='*60}")
+    print(f"INPUT ARGUMENTS:")
+    for key, value in input_args.items():
+        print(f"  {key}: {value}")
+    print(f"\nMODEL WOULD SEE:")
+    print(json.dumps(output, indent=2, ensure_ascii=False))
+    print(f"{'='*60}\n")
 
 
 class TestSubprocessMode:
@@ -133,13 +152,16 @@ class TestMCPIntegration:
         self.test_cpp_file = str(project_root / "tests" / "decomp_test_target.cpp")
         
     @pytest.mark.asyncio
-    async def test_decompose_function_direct(self):
+    async def test_decompose_function_direct(self, display_results):
         """Test decompose_function function directly."""
         # Test with a simple function that might exist
-        result = await decompose_function(
-            file_path=self.test_cpp_file,
-            function_name="test_function"
-        )
+        input_args = {
+            "file_path": self.test_cpp_file,
+            "function_name": "test_function"
+        }
+        result = await decompose_function(**input_args)
+        
+        display_tool_output("mcp__tt-metal-tools__decompose_function", input_args, result, display_results)
         
         # Should return a dictionary with expected structure
         assert isinstance(result, dict)
@@ -147,9 +169,12 @@ class TestMCPIntegration:
         assert len(result) > 0
     
     @pytest.mark.asyncio
-    async def test_query_llk_functions_direct(self):
+    async def test_query_llk_functions_direct(self, display_results):
         """Test query_llk_functions function directly."""
-        result = await query_llk_functions("math")
+        input_args = {"keyword": "math"}
+        result = await query_llk_functions(**input_args)
+        
+        display_tool_output("mcp__tt-metal-tools__query_llk_functions", input_args, result, display_results)
         
         # Should return a dictionary
         assert isinstance(result, dict)
@@ -157,9 +182,12 @@ class TestMCPIntegration:
         assert len(result) > 0
     
     @pytest.mark.asyncio
-    async def test_find_similar_symbols_direct(self):
+    async def test_find_similar_symbols_direct(self, display_results):
         """Test find_similar_symbols function directly."""
-        result = await find_similar_symbols("add", max_results=5)
+        input_args = {"incorrect_symbol": "add", "max_results": 5}
+        result = await find_similar_symbols(**input_args)
+        
+        display_tool_output("mcp__tt-metal-tools__find_similar_symbols", input_args, result, display_results)
         
         # Should return a dictionary
         assert isinstance(result, dict)
@@ -214,8 +242,8 @@ class TestClaudeCodeSDK:
         self.test_cpp_file = str(project_root / "tests" / "decomp_test_target.cpp")
     
     @pytest.mark.skipif(
-        not os.environ.get("ANTHROPIC_API_KEY"),
-        reason="ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
+        not (os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_API_KEY")),
+        reason="ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
     )
     def test_claude_sdk_decompose_function(self):
         """Test decompose_function via Claude Code SDK."""
@@ -261,8 +289,8 @@ class TestClaudeCodeSDK:
             pytest.skip("anthropic package not available")
     
     @pytest.mark.skipif(
-        not os.environ.get("ANTHROPIC_API_KEY"),
-        reason="ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
+        not (os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_API_KEY")),
+        reason="ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
     )
     def test_claude_sdk_query_llk_functions(self):
         """Test query_llk_functions via Claude Code SDK."""
@@ -306,8 +334,8 @@ class TestClaudeCodeSDK:
             pytest.skip("anthropic package not available")
     
     @pytest.mark.skipif(
-        not os.environ.get("ANTHROPIC_API_KEY"),
-        reason="ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
+        not (os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_API_KEY")),
+        reason="ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY not set - skipping Claude SDK tests"
     )
     def test_claude_sdk_find_similar_symbols(self):
         """Test find_similar_symbols via Claude Code SDK."""
@@ -379,7 +407,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_find_similar_symbols_empty_symbol(self):
         """Test find_similar_symbols with empty symbol."""
-        result = await find_similar_symbols("")
+        result = await find_similar_symbols(incorrect_symbol="")
         
         # Should handle empty symbol gracefully
         assert isinstance(result, dict)
@@ -387,4 +415,6 @@ class TestErrorHandling:
 
 if __name__ == "__main__":
     # Run tests with pytest when executed directly
-    pytest.main([__file__, "-v"])
+    # Use --display-results to see what the model would see for each tool call
+    # Example: python test_all_tools.py --display-results -v -s
+    pytest.main([__file__, "-v"] + sys.argv[1:])
